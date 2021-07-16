@@ -1,0 +1,30 @@
+{
+  "name": "contactbook",
+  "version": "1.0.0",
+  "description": "This repository is for learning purposes only.",
+  "main": "index.js",
+  "scripts": {
+    "start": "shadow-cljs watch contacts",
+    "all": "npm run build-styles && shadow-cljs watch contacts",
+    "build-styles": "npx tailwindcss -i src/cljs/tailwind.css -o resources/public/css/main.css",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/softquantum/learning-clojure-contactbook.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/softquantum/learning-clojure-contactbook/issues"
+  },
+  "homepage": "https://github.com/softquantum/learning-clojure-contactbook#readme",
+  "dependencies": {
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-refresh": "^0.10.0",
+    "shadow-cljs": "^2.15.1",
+    "tailwindcss": "^2.2.4"
+  }
+}
