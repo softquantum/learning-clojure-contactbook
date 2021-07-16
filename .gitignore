@@ -1,0 +1,16 @@
+### Clojure ###
+pom.xml
+pom.xml.asc
+*.jar
+*.class
+/lib/
+/classes/
+/target/
+/checkouts/
+*.iml
+*.ipr
+.nrepl-port
+.cpcache
+.idea
+.vscode
+
