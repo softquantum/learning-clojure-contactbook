@@ -17,7 +17,7 @@
                            :last-name "Ale"
                            :email "ga@dot.com"})
    (get-contact-by-id config {:id 1})
-   (update-contact-by-id config {:id 1
+   (update-contact-by-id config {:id 4
                                  :first-name "Maxime updated"
                                  :last-name "Decooman"
                                  :email "email@dot.com"})

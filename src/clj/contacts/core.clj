@@ -2,11 +2,16 @@
    (:require [org.httpkit.server :refer [run-server]]
              [reitit.ring :as ring]
              [reitit.ring.middleware.exception :refer [exception-middleware]]
+             [reitit.ring.middleware.parameters :refer [parameters-middleware]]
              [reitit.ring.middleware.muuntaja :refer [format-negotiate-middleware
                                                       format-request-middleware
                                                       format-response-middleware]]
+             [reitit.ring.coercion :refer [coerce-exceptions-middleware
+                                           coerce-request-middleware
+                                           coerce-response-middleware]]
+             [reitit.coercion.schema]
              [muuntaja.core :as m]
-             [contacts.db :as db]))
+             [contacts.routes :refer [ping-route contact-routes]]))
 
 (defonce server (atom nil))
 
@@ -14,24 +19,24 @@
    (ring/ring-handler
       (ring/router
          [["/api"
-            ["/ping" {:get (fn [req]
-                             {:status 200
-                              :body {:ping "pong"}})}]
-            ["/contacts" {:get (fn [req]
-                                  {:status 200
-                                   :body (db/get-contacts db/config)})}]]]
-         {:data {:muuntaja m/instance
-                 :middleware [format-negotiate-middleware
-                              format-request-middleware
+           ping-route
+           contact-routes]]
+         {:data {:coercion reitit.coercion.schema/coercion
+                 :muuntaja m/instance
+                 :middleware [parameters-middleware
+                              format-negotiate-middleware
+                              format-response-middleware
                               exception-middleware
-                              format-response-middleware]}})
+                              format-request-middleware
+                              coerce-exceptions-middleware
+                              coerce-request-middleware
+                              coerce-response-middleware]}})
       (ring/routes
           (ring/redirect-trailing-slash-handler)
           (ring/create-default-handler
-            {:not-found (constantly {:status 404
-                                     :body "Route not found"})}))))
+            {:not-found (constantly {:status 404 :body "Route not found"})}))))
 
-(defn stop-server [] <
+(defn stop-server []
    (when-not (nil? @server)
        ;; graceful shutdown: wait 100ms for existing requests to be finished
        ;; :timeout is optional, when no timeout, stop immediately
@@ -54,7 +59,3 @@
    @server
    (-main)
    (app {:request-method :get :uri "/api/contacts"}))
-
-
-
-
