@@ -2,11 +2,10 @@
    (:require [helix.core :refer [defnc <> $]]
              [helix.hooks :as hooks]
              [helix.dom :as d]
+             [contacts.state :refer [use-app-state]]
              [contacts.utils :refer [make-label-str
                                      contact-form-fields
                                      api-host]]))
-
-
 
 (defnc contact-display-item [{:keys [label value]}]
    (d/p
@@ -49,7 +48,9 @@
              contact-form-fields))))
 
 (defnc contact-form [{:keys [contact]}]
-   (let [[edit set-edit] (hooks/use-state false)]
+   (let [[edit set-edit] (hooks/use-state false)
+         [state actions] (use-app-state)
+         contact (:selected state)]
     (d/div
        (d/h1 "Contact Form")
        (d/button {:on-click #(set-edit (not edit))}

@@ -1,31 +1,37 @@
 (ns contacts.core
    (:require [ajax.core :refer [GET]]
-             [helix.core :refer [defnc $ <>]]
+             [helix.core :refer [defnc $ <> provider]]
              [helix.hooks :as hooks]
              [helix.dom :as d]
              ["react-dom" :as dom]
+             [contacts.state :refer [app-state initial-state app-reducer use-app-state]]
              [contacts.components.nav :refer [nav]]
              [contacts.components.contact-list :refer [contact-list]]
              [contacts.components.contact-form :refer [contact-form]]))
 
 (defnc app []
-   (let [[state set-state] (hooks/use-state nil)]
+   (let [[state actions] (use-app-state)
+         init (:init actions)]
       (hooks/use-effect
          :once
          (GET "http://localhost:8080/api/contacts"
-              {:handler (fn [response]
-                           (set-state response))}))
+              {:handler init}))
       (js/console.log state)
       (if state
          (<>
             ($ nav)
             (d/div {:class '[container pt-4]}
-               ($ contact-list {:contacts state})
-               ($ contact-form {:contact (first state)})))
+               ($ contact-list)
+               ($ contact-form)))
          (d/p "Loading..."))))
 
+(defnc provided-app []
+       (provider {:context app-state
+                  :value (hooks/use-reducer app-reducer initial-state)}
+                 ($ app)))
+
 (defn ^:export ^dev/after-load init []
-   (dom/render ($ app) (js/document.getElementById "app")))
+   (dom/render ($ provided-app) (js/document.getElementById "app")))
 
 (comment
    (GET "http://localhost:8080/api/contacts"
