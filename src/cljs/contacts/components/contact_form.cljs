@@ -1,5 +1,6 @@
 (ns contacts.components.contact-form
-   (:require [helix.core :refer [defnc <> $]]
+   (:require [ajax.core :refer [PUT POST]]
+             [helix.core :refer [defnc <> $]]
              [helix.hooks :as hooks]
              [helix.dom :as d]
              [contacts.state :refer [use-app-state]]
@@ -33,28 +34,66 @@
                 :on-change on-change})))
 
 (defnc contact-edit [{:keys [contact]}]
-   (let [[state set-state] (hooks/use-state contact)]
-       (d/form
-          (map-indexed
+  (let [[state set-state] (hooks/use-state contact)
+        [app-state actions] (use-app-state)
+        selected (:selected app-state)
+        {:keys [add-contact update-contact]} actions]
+    (d/form {:on-submit (fn [e]
+                          (.preventDefault e)
+                          (if selected
+                            (PUT (str api-host "/contacts/" (:id selected))
+                              (let [{:keys [first_name last_name email]} state]
+                                {:params {:first-name first_name
+                                          :last-name last_name
+                                          :email email}
+                                 :format :json
+                                 :handler (fn [response]
+                                            (update-contact (first (:contact response))))}))
+                            (POST (str api-host "/contacts")
+                              (let [{:keys [first_name last_name email]} state]
+                                {:params {:first-name first_name
+                                          :last-name last_name
+                                          :email email}
+                                 :format :json
+                                 :handler (fn [response]
+                                            (add-contact (first response)))}))))}
+            (map-indexed
              (fn [i v]
-                ($ contact-edit-item {:label v
-                                      :value (get state (keyword v))
-                                      :key i
-                                      :on-change #(set-state
-                                                     (assoc state (keyword v)
-                                                                  (.. %
-                                                                      -target
-                                                                      -value)))}))
-             contact-form-fields))))
+               ($ contact-edit-item {:label v
+                                     :value (get state (keyword v))
+                                     :key i
+                                     :on-change #(set-state
+                                                  (assoc state
+                                                         (keyword v)
+                                                         (.. %
+                                                             -target
+                                                             -value)))}))
+             contact-form-fields)
+            (d/button {:type "submit"
+                       :class '[bg-green-500 py-2 px-4 w-full text-white]}
+                      "Submit"))))
 
-(defnc contact-form [{:keys [contact]}]
+(defnc contact-form []
    (let [[edit set-edit] (hooks/use-state false)
          [state actions] (use-app-state)
-         contact (:selected state)]
-    (d/div
-       (d/h1 "Contact Form")
-       (d/button {:on-click #(set-edit (not edit))}
-                 "toggle")
-       (if edit
-          ($ contact-edit {:contact contact})
-          ($ contact-display {:contact contact})))))
+         selected (:selected state)
+         new-contact (:new-contact actions)]
+      (hooks/use-effect
+        [selected]
+        (if (not selected)
+            (set-edit true)
+            (set-edit false)))
+      (d/div
+         (d/div {:class '[mb-2 flex]}
+            (d/button {:class '[bg-green-500 py-1 px-4 rounded text-white]
+                       :on-click #(new-contact)}
+                      "New contact")
+            (when selected
+               (d/button {:class '[bg-green-500 ml-2 py-1 px-4 rounded text-white]
+                          :on-click #(set-edit (not edit))}
+                         (if edit
+                            "Cancel"
+                            "Edit Contact"))))
+         (if edit
+            ($ contact-edit {:contact selected})
+            ($ contact-display {:contact selected})))))
