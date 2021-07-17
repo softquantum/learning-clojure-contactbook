@@ -7,10 +7,14 @@ pom.xml.asc
 /classes/
 /target/
 /checkouts/
+node_modules
 *.iml
 *.ipr
 .nrepl-port
 .cpcache
 .idea
 .vscode
-
+pgdata
+.shadow-cljs
+resources/public/js
+resources/public/css
