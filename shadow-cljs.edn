@@ -1,5 +1,5 @@
 {:source-paths ["src/cljs"]
- :nrepl {:port 9000}
+ :nrepl {:port 9090}
  :dependencies [[cljs-ajax "0.8.3"]
                 [lilactown/helix "0.1.1"]]
  :builds {:contacts {:target :browser

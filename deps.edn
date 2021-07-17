@@ -1,5 +1,6 @@
 {:paths ["src/clj" "resources"]
  :deps {org.clojure/clojure {:mvn/version "1.10.3"}
+        thheller/shadow-cljs {:mvn/version "2.15.1"}
         metosin/reitit {:mvn/version "0.5.13"}
         ring-cors/ring-cors {:mvn/version "0.1.13"}
         http-kit/http-kit {:mvn/version "2.5.3"}
